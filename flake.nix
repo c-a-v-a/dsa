@@ -11,6 +11,9 @@
       (system:
         let
           pkgs = nixpkgs.legacyPackages.${system};
+          tex = (pkgs.texlive.combine {
+            inherit (pkgs.texlive) scheme-small algorithmicx;
+          });
         in
         {
           devShells.default = pkgs.mkShell {
@@ -18,6 +21,7 @@
               (pkgs.python3.withPackages (python-pkgs: [
                 python-pkgs.pycryptodome
               ]))
+              tex
             ];
           };
         }

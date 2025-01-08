@@ -1,0 +1,66 @@
+\documentclass[11pt]{article}
+
+\usepackage[T1]{fontenc}
+\usepackage[polish]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage{indentfirst}
+\usepackage{algpseudocode}
+\usepackage{amsmath}
+
+\topmargin=-0.45in
+\evensidemargin=0in
+\oddsidemargin=0in
+\textwidth=6.5in
+\textheight=9.0in
+\headsep=0.25in
+
+\title{Digital Signature Algorithm}
+\author{Filip Cebula, 151410}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+\pagebreak
+
+\section{Wstęp}
+DSA to algorytm kryptograficzny, który służy do generowania i weryfikacji
+cyfrowych podpisów. Algorytm ten opiera się na problemie logarytmu
+dyskretnego, co sprawia, że jest trudny do złamania. DSA jest
+wykorzystywany, do potwierdzania autentyczności i integralności przesyłanych
+informacji. Algorytm składa się z trzech części: generacji kluczy, podpisywania
+i weryfikacji podpisu.
+
+\section{Generacja kluczy}
+Generacje kluczy możemy podzielić na dwie fazy. Pierwszą jest dobór
+odpowiednich parametrów algorytmu, a drugą jest generacja klucza prywatnego
+i publicznego dla użytkownika.
+
+\subsection{Generacja parametrów}
+Generujemy parametry \textbf{(p,q,g)}, przy pomocy których wygenerujemy nasze
+klucze.
+\begin{enumerate}
+  \item Wybieramy parę liczb \textbf{(L,N)}, która oznaczać bedzie rozmiary
+    naszych parametrów. Rekomendowane rozmiay to (2048 bitów, 256 bitów).
+  \item Wybieramy liczbę \textbf{q}, która jest liczbą pierwszą o \textbf{N}
+    bitach długości.
+  \item Wybieramy liczbę pierwszą \textbf{p}, taką że liczba \textbf{p-1} jest
+    wielokrotnością liczby \textbf{q}.
+  \item Wybieramy losowo liczbę całkowitą \textbf{h} z przedziału $[2; p-2]$.
+  \item Obliczamy liczbę \textbf{g} ze wzoru $g=h^{(p-1)/q} \pmod p$. Jeżeli
+    otrzymamy $g=1$, to wtedy obliczamy g jeszcze raz, wybierając inne
+    \textbf{h}.
+\end{enumerate}
+
+\subsection{Generacja kluczy}
+Generujemy klucz prywatny \textbf{x} i klucz publiczny \textbf{y}, gdzie
+\textbf{x} to losowa liczba całkowita z przedziału $[1,q-1]$, a \textbf{y}
+obliczamy ze wzoru $y=g^{x} \pmod p$.
+
+\subsection{Przykład}
+
+\subsection{Pseudokod}
+
+\section{Przykładowy program}
+
+\end{document}
