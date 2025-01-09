@@ -191,6 +191,64 @@ jest spełniony więc ten krok możemy pominąć.
 
 \pagebreak
 
+\subsection{Poprawność weryfikacji}
+Aby weryfikacja była poprawna musimy udowodnić że dla każdego, poprawnie
+wygenerowanego, \textbf{r} i \textbf{v}, odpowiadającemu temu samemu podpisowi
+$r=v$.
+
+\begin{equation*}
+  r = v
+\end{equation*}
+\begin{equation*}
+  (g^{k} \pmod p) \pmod q = (g^{v_{1}}y^{v_{2}} \pmod p) \pmod q
+\end{equation*}
+
+Wiemy także, że:
+\begin{equation*}
+  w = s^{-1} \pmod q
+\end{equation*}
+\begin{equation*}
+  s \equiv k^{-1}(H(M) + xr) \pmod q
+\end{equation*}
+\begin{equation*}
+  y \equiv g^{x} \pmod p
+\end{equation*}
+
+Po przekształceniu:
+\begin{equation*}
+  k \equiv s^{-1}(H(M) + xr) \pmod q
+\end{equation*}
+\begin{equation*}
+  k \equiv H(M)w + xrw \pmod q
+\end{equation*}
+
+Więc
+\begin{equation*}
+  \begin{aligned}
+    g^{k} \equiv g^{H(M)w + xrw} \\ \equiv g^{H(M)w} g^{xrw} \\ \equiv g^{H(M)w} y^{rw} \pmod p
+  \end{aligned}
+\end{equation*}
+
+Pamiętając, że
+\begin{equation*}
+  v_{1} \equiv H(M) * w \pmod q
+\end{equation*}
+\begin{equation*}
+  v_{2} \equiv r * w \pmod q
+\end{equation*}
+
+Po podstawieniu do wcześniejszego wzoru:
+\begin{equation*}
+    g^{k} \equiv g^{H(M)w} y^{rw} \pmod p \equiv g^{v_1}y^v_2 \pmod p
+\end{equation*}
+\begin{equation*}
+    r = (g^{k} \pmod p) \pmod q = (g^{v_{1}}y^{v_{2}} \pmod p) \pmod q = v
+\end{equation*}
+
+Co kończy dowód.
+
+\pagebreak
+
 \section{Przykładowy program}
 
 \end{document}
