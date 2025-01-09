@@ -5,6 +5,7 @@
 \usepackage[utf8]{inputenc}
 \usepackage{indentfirst}
 \usepackage{algpseudocode}
+\usepackage{algorithm}
 \usepackage{amsmath}
 
 \topmargin=-0.45in
@@ -36,30 +37,105 @@ Generacje kluczy możemy podzielić na dwie fazy. Pierwszą jest dobór
 odpowiednich parametrów algorytmu, a drugą jest generacja klucza prywatnego
 i publicznego dla użytkownika.
 
-\subsection{Generacja parametrów}
-Generujemy parametry \textbf{(p,q,g)}, przy pomocy których wygenerujemy nasze
-klucze.
-\begin{enumerate}
-  \item Wybieramy parę liczb \textbf{(L,N)}, która oznaczać bedzie rozmiary
-    naszych parametrów. Rekomendowane rozmiay to (2048 bitów, 256 bitów).
-  \item Wybieramy liczbę \textbf{q}, która jest liczbą pierwszą o \textbf{N}
-    bitach długości.
-  \item Wybieramy liczbę pierwszą \textbf{p}, taką że liczba \textbf{p-1} jest
-    wielokrotnością liczby \textbf{q}.
-  \item Wybieramy losowo liczbę całkowitą \textbf{h} z przedziału $[2; p-2]$.
-  \item Obliczamy liczbę \textbf{g} ze wzoru $g=h^{(p-1)/q} \pmod p$. Jeżeli
-    otrzymamy $g=1$, to wtedy obliczamy g jeszcze raz, wybierając inne
-    \textbf{h}.
-\end{enumerate}
+\subsection{Pseudokod}
+\begin{algorithm}
+\caption{Algorytm generacji kluczy}\label{alg:cap}
+  \begin{algorithmic}[1]
+    \Require \textbf{L}, \textbf{N}
+    \Comment Rekomendowana wartość L to 2048 lub 3072
+    \Ensure \textbf{N} jest równe długości wyjścia funkcji haszującej
+      (np. SHA256)
 
-\subsection{Generacja kluczy}
-Generujemy klucz prywatny \textbf{x} i klucz publiczny \textbf{y}, gdzie
-\textbf{x} to losowa liczba całkowita z przedziału $[1,q-1]$, a \textbf{y}
-obliczamy ze wzoru $y=g^{x} \pmod p$.
+    \State Wybieramy liczbę pierwszą \textbf{q} o rozmiarze \textbf{N} bitów.
+    \State Wybieramy liczbę pierwszą \textbf{p} o rozmiarze \textbf{L} bitów
+      taką, że $q|p-1$.
+
+    \Repeat
+      \State Wybieramy losową liczbę całkowitą \textbf{h}, taką że $h \in [2;p-2]$
+      \State $g \gets h^{(p-1)/q} \pmod p$
+    \Until{$g \neq 1$}
+
+    \State Wybieramy losową liczbę całkowitą \textbf{x}, taką że $x \in [1;q-1]$
+    \State $y \gets g^{x} \pmod p$
+
+    \State \Return \textbf{(p,q,g)}
+    \Comment{Parametry algorytmu DSA}
+    \State \Return \textbf{x}
+    \Comment{Klucz prywatny}
+    \State \Return \textbf{y}
+    \Comment{Klucz publiczny}
+  \end{algorithmic}
+\end{algorithm}
 
 \subsection{Przykład}
+\begin{enumerate}
+  \item Na potrzeby przykładu użyjemy mniejszych rozmiarów liczb, tj.
+    \textbf{L=16} i \textbf{N=4}.
+  \item Wybieramy liczbę \textbf{q=13}.
+  \item Wybieramy liczbę \textbf{p=57773}.
+  \item Wybieramy losową liczbę całkowitą \textbf{h}, z przedziału $[2; 57771]$.
+    W naszym przykładzie weźmy liczbę \textbf{h=37154}.
+  \item Obliczamy liczbę \textbf{g}, kożystając z szybkiego potęgowania modulo.
+    W naszym przypadku \textbf{g=45887}.
+  \item Wybieramy losową liczbę całkowitą \textbf{x} z przedziału $[1; 12]$. W
+    naszym przypadku \textbf{x=4}. Liczba \textbf{x} to klucz prywatny.
+  \item Obliczamy liczbę \textbf{y}. W naszym przypadku \textbf{y=57516}. Liczba
+    \textbf{y} to nasz klucz publiczny.
+\end{enumerate}
+
+\section{Generacja podpisu}
+Podpisywanie wiadomości jest najbardziej czasochłonną operacją w algorytmie DSA,
+jest to głównie spowodowane obliczeniem wartości \textbf{r} i \textbf{$k^{-1}$}.
+Jednak wartość \textbf{r} nie jest zależna od wiadomości, a jedynie od
+parametrów algorytmu, może być więc obliczona przed procesem podpisywania.
+
+Należy także pamiętać, że wybrana przez nas liczba losowa \textbf{k}, powinna
+być unikalna dla każdej wiadomości podpisanej danym kluczem prywatnym. W
+wypadku, gdy liczba \textbf{k} powtórzy się dla dwóch różnych wiadomości,
+możliwe będzie obliczenie klucza prywatnego \textbf{x}, użytego do podpisania
+informacji. Aby tego uniknąć zaleca się generowanie \textbf{k} w sposób
+deterministyczny na podstawie klucza prywatnego \textbf{x} i haszu podpisywanej
+informacji \textbf{H(M)}.
 
 \subsection{Pseudokod}
+\begin{algorithm}
+\caption{Algorytm generacji podpisu}\label{alg:cap}
+  \begin{algorithmic}[1]
+    \Require \textbf{M}
+    \Comment Informacja, którą chcemy podpisać
+    \Require \textbf{p},\textbf{q},\textbf{g}
+    \Comment Parametry algorytmu DSA
+    \Require \textbf{x}
+    \Comment Klucz prywatny
+
+    \State Niech \textbf{H(M)} oznacza wynik funkcji haszującej \textbf{H} na
+      informacji \textbf{M}
+    \Repeat
+      \State Wybieramy losową liczbę całkowitą \textbf{k}, taką że $k \in [1;q-1]$
+      \State $r \gets (g^{k} \pmod p) \pmod q$
+      \State $s \gets (k^{-1}(H(M) + xr)) \pmod q$
+    \Until{$s \neq 0$}
+
+    \State \Return \textbf{(r,s)}
+    \Comment{Wygenerowany podpis}
+  \end{algorithmic}
+\end{algorithm}
+
+\subsection{Przykład}
+Do pokazania procesu podpisywania informacji, użyjemy obliczonych wcześniej
+przez nas parametrów \textbf{(p,q,g)}, oraz kluczy \textbf{x} i \textbf{y}.
+Przyjmujemy, że chcemy podpisać informacje \textbf{M}, oraz że wartość
+\textbf{H(M)=17}.
+
+\begin{enumerate}
+  \item Wybieramy losową liczbę \textbf{k} z przedziału [1;12], np. \textbf{k=4}.
+  \item Obliczamy \textbf{r}. $r=(45887^{4} \pmod 57773) \pmod 13 = 4$.
+  \item Obliczamy $4^{-1} \pmod 13 = 10$
+  \item Obliczamy \textbf{s}. $s= (10 * (17 + 4 * 4)) \pmod 13 = 330 \pmod 13 = 5$.
+  \item Otrzymana para liczb \textbf{(r,s)} to nasz podpis.
+\end{enumerate}
+
+\section{Weryfikacja podpisu}
 
 \section{Przykładowy program}
 
