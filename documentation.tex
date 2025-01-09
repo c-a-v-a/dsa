@@ -35,7 +35,9 @@ i weryfikacji podpisu.
 \section{Generacja kluczy}
 Generacje kluczy możemy podzielić na dwie fazy. Pierwszą jest dobór
 odpowiednich parametrów algorytmu, a drugą jest generacja klucza prywatnego
-i publicznego dla użytkownika.
+i publicznego dla użytkownika. Klucz publiczny powinien być przekazany do osób,
+które będą odbierać nasze wiadomości, natomiast klucz prywatny, jak nazwa
+wskazuje, nie powinien być udostępniany nikomu.
 
 \subsection{Pseudokod}
 \begin{algorithm}
@@ -84,6 +86,11 @@ i publicznego dla użytkownika.
 \end{enumerate}
 
 \section{Generacja podpisu}
+Algorytm DSA pozwala nam na stworzenie podpisu do danej informacji, dzięki czemu
+odbiorca informacji może zweryfikować źródło, z którego pochodzi informacja,
+oraz czy informacja nie została w żaden sposób zmodyfikowana, zanim została
+odebrana.
+
 Podpisywanie wiadomości jest najbardziej czasochłonną operacją w algorytmie DSA,
 jest to głównie spowodowane obliczeniem wartości \textbf{r} i \textbf{$k^{-1}$}.
 Jednak wartość \textbf{r} nie jest zależna od wiadomości, a jedynie od
@@ -135,7 +142,54 @@ Przyjmujemy, że chcemy podpisać informacje \textbf{M}, oraz że wartość
   \item Otrzymana para liczb \textbf{(r,s)} to nasz podpis.
 \end{enumerate}
 
+\pagebreak
+
 \section{Weryfikacja podpisu}
+
+\subsection{Pseudokod}
+\begin{algorithm}
+\caption{Algorytm weryfikacji podpisu}\label{alg:cap}
+  \begin{algorithmic}[1]
+    \Require \textbf{H(M)}
+    \Comment Hasz odebranej informacji
+    \Require \textbf{r}, \textbf{s}
+    \Comment Para liczb tworzących podpis
+    \Require \textbf{p},\textbf{q},\textbf{g}
+    \Comment Parametry algorytmu DSA
+    \Require \textbf{y}
+    \Comment Klucz publiczny
+
+    \If{$0 < r < q \and 0 < s < q$}
+      \State $w \gets s^{-1} \pmod q$
+      \State $v_{1} \gets H(M) * w \pmod q$
+      \State $v_{2} \gets r * w \pmod q$
+      \State $v \gets (g^{v_{1}}y^{v_{2}} \pmod p) \pmod q$
+
+      \State \Return $v = r$
+      \Comment{Podpis jest poprawny, jeżeli wartość tego wyrażenia jest prawdziwa.}
+    \Else
+      \State \Return Niepoprawny format podpisu
+    \EndIf
+
+  \end{algorithmic}
+\end{algorithm}
+
+\subsection{Przykład}
+Jak w poprzednim punkcie, użyjemy wcześniej wyliczonych przez nas wartości,
+aby zweryfikować poprawnośc podpisu. Wiemy, że warunek $0 < r < q \and 0 < s < q$
+jest spełniony więc ten krok możemy pominąć.
+
+\begin{enumerate}
+  \item Obliczamy wartość \textbf{w}. $w = 5^{-1} \pmod 13 = 8$
+  \item Obliczamy wartość \textbf{$v_1$}. $v_1 = 17 * 8 \pmod 13 = 6$
+  \item Obliczamy wartość \textbf{$v_2$}. $v_2 = 4 * 8 \pmod 13 = 6$
+  \item Obliczamy wartość \textbf{v}.
+    $v = (45887^6 * 57516 ^ 6 \pmod 57773) \pmod 13 = 57516 \pmod 13 = 4$
+  \item Otrzymaliśmy wartość $v=4$. $v=r$ z czego wynika, że podpis jest
+    poprawny.
+\end{enumerate}
+
+\pagebreak
 
 \section{Przykładowy program}
 
