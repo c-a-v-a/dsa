@@ -12,7 +12,7 @@
         let
           pkgs = nixpkgs.legacyPackages.${system};
           tex = (pkgs.texlive.combine {
-            inherit (pkgs.texlive) scheme-small algorithmicx;
+            inherit (pkgs.texlive) scheme-small algorithms algorithmicx;
           });
         in
         {
@@ -20,6 +20,7 @@
             buildInputs = [
               (pkgs.python3.withPackages (python-pkgs: [
                 python-pkgs.pycryptodome
+                python-pkgs.sympy
               ]))
               tex
             ];
