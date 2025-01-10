@@ -31,36 +31,26 @@ class DSA:
     self.x = x
     self.y = y
 
-  def save_keys(self, private_key_path, public_key_path):
-    f = open(private_key_path, 'w')
-    f.write(f'{self.p}\n')
-    f.write(f'{self.q}\n')
-    f.write(f'{self.g}\n')
-    f.write(f'{self.x}\n')
-    f.close()
+  def export_private_key(self):
+    return f'{self.p}\n{self.q}\n{self.g}\n{self.x}'
 
-    f = open(public_key_path, 'w')
-    f.write(f'{self.p}\n')
-    f.write(f'{self.q}\n')
-    f.write(f'{self.g}\n')
-    f.write(f'{self.y}\n')
-    f.close()
+  def export_public_key(self):
+    return f'{self.p}\n{self.q}\n{self.g}\n{self.y}'
 
-  def load_private_key(self, path):
-    f = open(path, 'r')
-    lines = f.readlines()
+  def load_private_key(self, content):
+    lines = content.splitlines()
     ints = list(map(int, lines))
     [self.p, self.q, self.g, self.x] = ints
-    f.close()
 
-  def load_public_key(self, path):
-    f = open(path, 'r')
-    lines = f.readlines()
+  def load_public_key(self, content):
+    lines = content.splitlines()
     ints = list(map(int, lines))
     [self.p, self.q, self.g, self.y] = ints
-    f.close()
 
-  def sign(self, message, signature_path):
+  def sign(self, message):
+    if not self._are_params_loaded() or self.x == 0:
+      raise Exception('Error. Key was not loaded.')
+
     H = self._hash(message)
     s = 0
     r = 0
@@ -71,22 +61,20 @@ class DSA:
       r = pow(self.g,k,self.p) % self.q
       s = (invk *(H + self.x*r)) % self.q
 
-    r = r
-    s = s
+    return f'{r}\n{s}'
 
-    f = open(signature_path, 'w')
-    f.write(f'{r}\n')
-    f.write(f'{s}\n')
-    f.close()
+  def verify(self, message, signature):
+    if not self._are_params_loaded() or self.y == 0:
+      raise Exception('Error. Key was not loaded.')
 
-  def validate(self, message, signature_path):
     H = self._hash(message)
 
-    f = open(signature_path, 'r')
-    lines = f.readlines()
+    lines = signature.splitlines()
     ints = list(map(int, lines))
     [r, s] = ints
-    f.close()
+
+    if r < 0 or r > self.q or s < 0 or s > self.q:
+      raise Exception('Error. Invalid signature format.')
 
     w = pow(s, -1, self.q)
     v1 = (H * w) % self.q
@@ -106,3 +94,6 @@ class DSA:
     m = str.encode(message)
     h = sha256(m).digest()
     return int.from_bytes(h, 'big') % self.q
+
+  def _are_params_loaded(self):
+    return not (self.p == 0 or self.q == 0 or self.g == 0)

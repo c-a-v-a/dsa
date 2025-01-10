@@ -1,4 +1,7 @@
 *.aux
 *.log
-publickey
-privatekey
+dsa_private
+dsa_public
+message
+signature-message
+__pycache__/

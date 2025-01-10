@@ -121,7 +121,7 @@ informacji \textbf{H(M)}.
       \State Wybieramy losową liczbę całkowitą \textbf{k}, taką że $k \in [1;q-1]$
       \State $r \gets (g^{k} \pmod p) \pmod q$
       \State $s \gets (k^{-1}(H(M) + xr)) \pmod q$
-    \Until{$s \neq 0$}
+    \Until{$s \neq 0 \land r \neq 0$}
 
     \State \Return \textbf{(r,s)}
     \Comment{Wygenerowany podpis}
@@ -159,7 +159,7 @@ Przyjmujemy, że chcemy podpisać informacje \textbf{M}, oraz że wartość
     \Require \textbf{y}
     \Comment Klucz publiczny
 
-    \If{$0 < r < q \and 0 < s < q$}
+    \If{$0 < r < q \land 0 < s < q$}
       \State $w \gets s^{-1} \pmod q$
       \State $v_{1} \gets H(M) * w \pmod q$
       \State $v_{2} \gets r * w \pmod q$
@@ -222,6 +222,19 @@ Po przekształceniu:
   k \equiv H(M)w + xrw \pmod q
 \end{equation*}
 
+Wiemy także, że \textbf{g} jest pożądku \textbf{q}, ponieważ
+\begin{equation*}
+    g = h^{(p-1)/q} \pmod p
+\end{equation*}
+\begin{equation*}
+    g^q = h^{(p-1)} \pmod p
+\end{equation*}
+
+Co na podstawie małego twierdzenia Fermata oznacza
+\begin{equation*}
+    g^q \equiv h^{(p-1)} \pmod p \equiv 1
+\end{equation*}
+
 Więc
 \begin{equation*}
   \begin{aligned}
@@ -239,7 +252,7 @@ Pamiętając, że
 
 Po podstawieniu do wcześniejszego wzoru:
 \begin{equation*}
-    g^{k} \equiv g^{H(M)w} y^{rw} \pmod p \equiv g^{v_1}y^v_2 \pmod p
+  g^{k} \equiv g^{H(M)w} y^{rw} \pmod p \equiv g^{v_1}y^{v_2} \pmod p
 \end{equation*}
 \begin{equation*}
     r = (g^{k} \pmod p) \pmod q = (g^{v_{1}}y^{v_{2}} \pmod p) \pmod q = v

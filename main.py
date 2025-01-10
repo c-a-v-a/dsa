@@ -1,92 +1,94 @@
 from sys import argv
-from Crypto.PublicKey import DSA
-from Crypto.Signature import DSS
-from Crypto.Hash import SHA256
 
-
-KEY_SIZE = 2048
-SIGNATURE_TYPE = 'fips-186-3'
+from dsa import *
 
 
 def keygen():
   print('Generating...')
 
-  key = DSA.generate(KEY_SIZE)
+  dsa = DSA()
+  dsa.keygen()
 
   try:
-    f = open(f'dsa_public.pem', 'wb')
-    f.write(key.publickey().export_key())
+    f = open(f'dsa_public', 'w')
+    f.write(dsa.export_public_key())
     f.close()
   except:
     print('Error. Could not save public key to a file')
+    return None
 
   try:
-    f = open(f'dsa_private.pem', 'wb')
-    f.write(key.export_key())
+    f = open(f'dsa_private', 'w')
+    f.write(dsa.export_private_key())
     f.close()
   except:
     print('Error. Could not save private key to a file')
+    return None
   
   print('Done')
 
 
 def sign(message_path, key_path):
+  dsa = DSA()
+
   try:
-    message_file = open(message_path, 'rb')
+    message_file = open(message_path, 'r')
     message = message_file.read()
-    message_hash = SHA256.new(message)
     message_file.close()
   except:
     print('Error. Could not open the message file')
+    return None
 
   try:
-    key_file = open(key_path, 'rb')
-    key = DSA.import_key(key_file.read())
+    key_file = open(key_path, 'r')
+    key = dsa.load_private_key(key_file.read())
     key_file.close()
   except:
     print('Error. Unable to load the private key')
+    return None
 
   try:
-    signature_file = open(f'signature-{message_path}', 'wb')
-    signer = DSS.new(key, SIGNATURE_TYPE)
-    signature = signer.sign(message_hash)
+    signature_file = open(f'signature-{message_path}', 'w')
+    signature = dsa.sign(message)
     signature_file.write(signature)
     signature_file.close()
   except:
     print('Error. Unable to generate the signature file')
+    return None
 
   print(f'Message {message_path} signed. Signature saved to signature-{message_path}')
 
 
 def verify(message_path, key_path):
+  dsa = DSA()
+
   try:
-    message_file = open(message_path, 'rb')
+    message_file = open(message_path, 'r')
     message = message_file.read()
-    message_hash = SHA256.new(message)
     message_file.close()
   except:
     print('Error. Unable to load the signature')
+    return None
 
   try:
-    signature_file = open(f'signature-{message_path}', 'rb')
+    signature_file = open(f'signature-{message_path}', 'r')
     signature = signature_file.read()
     signature_file.close()
   except:
     print('Error. Unable to load the signature')
+    return None
 
   try:
-    key_file = open(key_path, 'rb')
-    key = DSA.import_key(key_file.read())
+    key_file = open(key_path, 'r')
+    key = dsa.load_public_key(key_file.read())
     key_file.close()
   except:
     print('Error. Unable to load the public key')
+    return None
 
-  try:
-    verifier = DSS.new(key, SIGNATURE_TYPE)
-    verifier.verify(message_hash, signature)
-    
+  if dsa.verify(message, signature):
     print('Signature is valid')
-  except ValueError:
+  else:
     print('The signature is not valid')
 
 
