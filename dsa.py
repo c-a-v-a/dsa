@@ -6,21 +6,11 @@ P_BIT_LENGTH = 2048
 Q_BIT_LENGTH = 256
 
 class DSA:
-  def __init__(self):
-    # Params
-    self.p = 0
-    self.q = 0
-    self.g = 0
-    # Private key
-    self.x = 0
-    # Public key
-    self.y = 0
-
   def keygen(self):
     p = 0
     g = 1
 
-    while not isprime(p) and not p.bit_length() == P_BIT_LENGTH:
+    while not isprime(p) or not p.bit_length() == P_BIT_LENGTH:
       k = randrange(2**1791, 2**1792)
       q = self._rand_prime(Q_BIT_LENGTH)
       p = (k*q) + 1
@@ -71,8 +61,7 @@ class DSA:
     f.close()
 
   def sign(self, message, signature_path):
-    sha = sha256(message.encode()).hexdigest()
-    H = int(sha, 16)
+    H = self._hash(message)
     s = 0
     r = 0
 
@@ -80,10 +69,10 @@ class DSA:
       k = randrange(1,self.q)
       invk = pow(k, -1, self.q)
       r = pow(self.g,k,self.p) % self.q
-      s = H + self.x*r
-      s = (s * invk) % self.q
+      s = (invk *(H + self.x*r)) % self.q
 
-    print(r, s)
+    r = r
+    s = s
 
     f = open(signature_path, 'w')
     f.write(f'{r}\n')
@@ -91,8 +80,7 @@ class DSA:
     f.close()
 
   def validate(self, message, signature_path):
-    sha = sha256(message.encode()).hexdigest()
-    H = int(sha, 16)
+    H = self._hash(message)
 
     f = open(signature_path, 'r')
     lines = f.readlines()
@@ -103,10 +91,7 @@ class DSA:
     w = pow(s, -1, self.q)
     v1 = (H * w) % self.q
     v2 = (r * w) % self.q
-    v = pow(self.g, v1, self.p)
-    v = v * pow(self.y, v2, self.p)
-    v = v % self.p
-    v = v % self.q
+    v = ((pow(self.g, v1, self.p) * pow(self.y, v2, self.p)) % self.p) % self.q
 
     return v == r
 
@@ -117,3 +102,7 @@ class DSA:
       if isprime(x):
         return x
 
+  def _hash(self, message):
+    m = str.encode(message)
+    h = sha256(m).digest()
+    return int.from_bytes(h, 'big') % self.q
