@@ -7,6 +7,9 @@
 \usepackage{algpseudocode}
 \usepackage{algorithm}
 \usepackage{amsmath}
+\usepackage{graphicx}
+
+\graphicspath{ {./images/} }
 
 \topmargin=-0.45in
 \evensidemargin=0in
@@ -263,5 +266,27 @@ Co kończy dowód.
 \pagebreak
 
 \section{Przykładowy program}
+
+\subsection{Generacja kluczy}
+\begin{figure}[h]
+  \includegraphics[scale=0.7]{keygen1.png}
+  \centering
+\end{figure}
+\begin{figure}[h]
+  \includegraphics[scale=0.7]{keygen2.png}
+  \centering
+\end{figure}
+
+\subsection{Podpisywanie wiadomości}
+\begin{figure}[h]
+  \includegraphics[scale=0.6]{sign.png}
+  \centering
+\end{figure}
+
+\subsection{Weryfikacja podpisu}
+\begin{figure}[H]
+  \includegraphics[scale=0.5]{verification.png}
+  \centering
+\end{figure}
 
 \end{document}

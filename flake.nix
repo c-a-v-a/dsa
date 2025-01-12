@@ -23,6 +23,7 @@
                 python-pkgs.sympy
               ]))
               tex
+              pkgs.scrot
             ];
           };
         }
